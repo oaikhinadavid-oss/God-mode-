@@ -1,0 +1,17 @@
+{
+  "name": "QuickFix Lagos",
+  "short_name": "QuickFix",
+  "description": "On-Demand Mechanics in Lagos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#22D3EE",
+  "icons":[
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2333/2333441.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
