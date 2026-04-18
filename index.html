@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFix Global | Lagos Automotive Infrastructure</title>
+    
+    <!-- PWA App Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --obsidian: #020617; --slate: #0F172A; --cyan: #22D3EE;
+            --neon: #10B981; --danger: #F43F5E; --gold: #F59E0B;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--obsidian); color: #F8FAFC; line-height: 1.6; overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* Security Advisory */
+        .scam-banner { background: var(--danger); color: white; text-align: center; padding: 12px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; position: sticky; top: 0; z-index: 1100; letter-spacing: 1px; }
+
+        header { padding: 18px 6%; display: flex; justify-content: space-between; align-items: center; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); position: sticky; top: 40px; z-index: 1000; border-bottom: 1px solid var(--border); }
+        .logo { font-size: 1.4rem; font-weight: 800; color: white; text-decoration: none; }
+        .logo span { color: var(--cyan); }
+
+        .mode-toggle { display: flex; background: var(--slate); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+        .mode-btn { padding: 8px 15px; border-radius: 8px; border: none; background: transparent; color: #64748B; font-size: 0.65rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .mode-btn.active { background: var(--cyan); color: var(--obsidian); }
+
+        /* Hero */
+        .hero { padding: 60px 6% 40px; text-align: center; background: radial-gradient(circle at top right, #0f172a 0%, #020617 100%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; }
+        
+        /* Auto Match GPS Button */
+        .btn-auto-match { background: linear-gradient(45deg, var(--cyan), #3b82f6); color: var(--obsidian); padding: 18px 35px; border: none; border-radius: 50px; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3); margin: 20px auto 40px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .btn-auto-match:hover { transform: scale(1.05); }
+
+        /* Market Intelligence Ticker */
+        .market-intel { max-width: 900px; margin: 0 auto 30px; padding: 20px; background: rgba(34, 211, 238, 0.03); border-radius: 16px; border: 1px solid var(--border); }
+        .intel-header { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 800; color: var(--cyan); text-transform: uppercase; margin-bottom: 15px; }
+        .ticker-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .ticker-item { background: var(--slate); padding: 15px; border-radius: 12px; border: 1px solid var(--border); font-size: 0.7rem; }
+        .ticker-item b { color: white; display: block; font-size: 0.95rem; margin-top: 5px; color: var(--gold); }
+        .market-disclaimer { font-size: 0.6rem; color: #64748B; text-align: center; margin-top: 15px; font-style: italic; }
+
+        /* Diagnostic Engine */
+        .diag-box { max-width: 900px; margin: 0 auto 40px; background: var(--slate); padding: 30px; border-radius: 24px; border: 1px solid var(--border); text-align: center; }
+        .diag-box h3 { font-size: 0.8rem; color: var(--cyan); text-transform: uppercase; margin-bottom: 20px; }
+        select, .command-bar input { background: var(--obsidian); border: 1px solid var(--border); padding: 15px; color: white; border-radius: 12px; font-weight: 600; outline: none; width: 100%; font-size: 0.9rem; }
+
+        /* Command Search Bar */
+        .command-bar { max-width: 900px; margin: 0 auto 50px; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; }
+        @media (max-width: 768px) { .command-bar { grid-template-columns: 1fr; } }
+
+        /* Results Grid */
+        .container { padding: 0 6% 100px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; }
+        
+        .card { background: var(--slate); border-radius: 28px; padding: 30px; border: 1px solid var(--border); position: relative; transition: 0.4s; overflow: hidden; }
+        .card.busy { opacity: 0.6; filter: grayscale(100%); pointer-events: none; }
+        .card:hover { border-color: var(--cyan); transform: translateY(-5px); }
+        
+        .distance-badge { position: absolute; top: 20px; left: 20px; background: rgba(16, 185, 129, 0.1); color: var(--neon); padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; border: 1px solid var(--neon); }
+        .tier-badge { position: absolute; top: 20px; right: 20px; background: var(--gold); color: black; font-size: 0.6rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; }
+        
+        .profile-area { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; margin-top: 25px; }
+        .profile-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--cyan); object-fit: cover; background: #000; }
+        .tech-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .rating-stars { color: var(--gold); font-size: 0.75rem; font-weight: 800; }
+        .tech-meta { font-size: 0.8rem; color: #94A3B8; margin-bottom: 20px; }
+
+        .scam-shield { background: rgba(244, 63, 94, 0.1); border: 1px solid var(--danger); padding: 12px; border-radius: 8px; font-size: 0.65rem; color: #FDA4AF; font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
+
+        .btn-action { width: 100%; padding: 16px; border-radius: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; border: none; margin-bottom: 10px; transition: 0.3s; }
+        .btn-call { background: var(--cyan); color: var(--obsidian); }
+        .btn-gps { background: transparent; border: 1px solid var(--neon); color: var(--neon); }
+        .btn-gps:hover { background: var(--neon); color: var(--obsidian); }
+
+        /* Portals */
+        .portal { display: none; }
+        .portal.active { display: block; }
+        .tech-panel { max-width: 450px; margin: 40px auto; background: var(--slate); padding: 40px; border-radius: 32px; border: 1px solid var(--cyan); }
+        .tech-field { width: 100%; background: var(--obsidian); border: 1px solid var(--border); padding: 15px; border-radius: 12px; color: white; margin-bottom: 15px; outline: none; }
+
+        /* Payment Overlay */
+        #payment-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,6,23,0.98); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .payment-card { background: var(--slate); padding: 40px; border-radius: 32px; border: 1px solid var(--neon); text-align: center; max-width: 450px; width: 100%; }
+        .amt-display { font-size: 3.5rem; font-weight: 800; color: white; margin: 15px 0; }
+
+        footer { text-align: center; padding: 60px 6%; color: #475569; font-size: 0.7rem; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+
+<div class="scam-banner">⚠️ FRAUD ALERT: NEVER PAY CASH. PAY ONLINE FOR 48-HOUR ESCROW PROTECTION. ⚠️</div>
+
+<header>
+    <a href="#" class="logo">QUICK<span>FIX</span> GLOBAL</a>
+    <div class="mode-toggle">
+        <button class="mode-btn active" onclick="switchMode('client', this)">CLIENT</button>
+        <button class="mode-btn" onclick="switchMode('tech', this)">TECHNICIAN</button>
+    </div>
+</header>
+
+<!-- CLIENT PORTAL -->
+<div id="client-portal" class="portal active">
+    <div class="hero">
+        <h1>Automotive Intelligence <br>On-Demand.</h1>
+        <p>Find the closest mechanic via GPS, diagnose faults, and pay securely online to activate your 7-day warranty.</p>
+        
+        <button class="btn-auto-match" id="autoMatchBtn" onclick="findNearestMechanic()">
+            <i class="fas fa-satellite-dish"></i> Auto-Match Nearest Mechanic
+        </button>
+    </div>
+
+    <!-- MARKET INTELLIGENCE -->
+    <div class="market-intel">
+        <div class="intel-header"><span>Market Price Reference (Ladipo)</span><span style="color:var(--neon)"><i class="fas fa-circle"></i> Live</span></div>
+        <div class="ticker-grid">
+            <div class="ticker-item"><span>Toyota Brake Pads</span><b>₦8,500 - ₦15k</b></div>
+            <div class="ticker-item"><span>Honda Fuel Pump</span><b>₦18k - ₦28k</b></div>
+            <div class="ticker-item"><span>Full Synth Oil (5L)</span><b>₦25k - ₦38k</b></div>
+        </div>
+        <div class="market-disclaimer">*Disclaimer: Estimated market guides. Final costs may vary with FX rates.</div>
+    </div>
+
+    <!-- DIAGNOSTIC ENGINE -->
+    <div class="diag-box">
+        <h3><i class="fas fa-microchip"></i> Autonomous Diagnostic Engine</h3>
+        <select id="symptom" onchange="runDiag()">
+            <option value="">What is the symptom?</option>
+            <option value="no-start">Car won't start / Clicking noise</option>
+            <option value="smoke">Smoke or Overheating</option>
+            <option value="brakes">Brakes are soft / Squeaking</option>
+        </select>
+        <div id="diag-res" style="display:none; color:var(--cyan); font-weight:800; font-size:0.8rem; margin-top:15px; padding:10px; background:rgba(34, 211, 238, 0.1); border-radius:8px;"></div>
+    </div>
+
+    <div class="command-bar">
+        <select id="brandSelect" onchange="runSearch()"><option value="all">ALL BRANDS</option><option value="toyota">TOYOTA</option><option value="honda">HONDA</option><option value="mercedes">MERCEDES</option></select>
+        <select id="areaSelect" onchange="runSearch()"><option value="all">LAGOS AREA</option><option value="Ikeja">IKEJA</option><option value="Lekki">LEKKI</option><option value="Ajah">AJAH</option><option value="Surulere">SURULERE</option><option value="VI">VICTORIA ISLAND</option></select>
+        <input type="text" id="streetInput" placeholder="SEARCH STREET..." onkeyup="runSearch()">
+    </div>
+
+    <div class="container">
+        <div id="status-msg" style="text-align:center; font-weight:800; color:var(--cyan); letter-spacing:2px;">SYNCING SECURE NETWORK...</div>
+        <div class="grid" id="mechanic-list"></div>
+    </div>
+</div>
+
+<!-- TECHNICIAN PORTAL -->
+<div id="tech-portal" class="portal">
+    <div class="tech-panel">
+        <h2 style="margin-bottom:20px; color:white;">Technician Console</h2>
+        <p style="font-size:0.75rem; color:#94A3B8; margin-bottom:20px;">Generate a secure digital invoice. Cash collections will result in network suspension.</p>
+        <input type="text" id="client-phone" class="tech-field" placeholder="Client WhatsApp (080...)">
+        <input type="number" id="final-amt" class="tech-field" placeholder="Total Repair Amount (₦)">
+        <button onclick="sendInvoice()" class="btn-action btn-call" style="width:100%;">Generate Secure Invoice</button>
+    </div>
+</div>
+
+<!-- PAYMENT OVERLAY -->
+<div id="payment-overlay">
+    <div class="payment-card">
+        <div style="color:var(--neon); font-weight:800; font-size:0.7rem; letter-spacing:2px; text-transform:uppercase;">Invoice Verified</div>
+        <div class="amt-display" id="display-amt">₦0</div>
+        <div style="background:rgba(16, 185, 129, 0.1); border:1px solid var(--neon); padding:15px; border-radius:12px; margin-bottom:25px; text-align:left;">
+            <p style="font-size:0.75rem; color:#D1FAE5;"><b>48-Hour Escrow Active:</b> Funds are held securely. QuickFix Warranty activates upon payment completion.</p>
+        </div>
+        <button class="btn-action" style="background:var(--neon); color:black;" onclick="processFinalPayment()">Authorize Payment</button>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 QUICKFIX GLOBAL INFRASTRUCTURE. ALL REPAIRS LOGGED FOR QUALITY CONTROL.</p>
+</footer>
+
+<script>
+    // 1. PAYSTACK KEY
+    const paystackPublicKey = 'pk_test_PASTE_YOUR_KEY_HERE'; 
+    // 2. OWNER WHATSAPP (YOU)
+    const ownerWhatsApp = '2348104270230'; 
+    // 3. GOOGLE SHEET LINK
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/1wj_SzI7EkcjIeZPhc5X5cPcCXyvMtMl4HIL5Ic-xkKQ/export?format=csv';
+
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error', err)); }
+
+    function switchMode(mode, btn) {
+        document.querySelectorAll('.portal').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(mode + '-portal').style.display = 'block';
+        btn.classList.add('active');
+    }
+
+    function runDiag() {
+        const s = document.getElementById('symptom').value;
+        const res = document.getElementById('diag-res');
+        if(s === 'no-start') res.innerText = "SYSTEM ANALYSIS: Battery dead or Starter Motor failure.";
+        else if(s === 'smoke') res.innerText = "SYSTEM ANALYSIS: Critical Overheating. Radiator or Oil Leak.";
+        else if(s === 'brakes') res.innerText = "SYSTEM ANALYSIS: Worn Brake Pads or Fluid Leak.";
+        res.style.display = s ? 'block' : 'none';
+    }
+
+    let allMechanics =[];
+
+    async function loadData() {
+        try {
+            const response = await fetch(sheetUrl);
+            const text = await response.text();
+            const rows = text.split('\n').filter(r => r.trim() !== "").slice(1);
+            
+            allMechanics = rows.map((row, index) => {
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                return {
+                    name: cols[0]?.trim() || "", area: cols[1]?.trim() || "", phone: cols[2]?.trim() || "", 
+                    service: cols[3]?.trim() || "", address: cols[4]?.trim() || "", subaccount: cols[8]?.trim() || "",
+                    rating: parseFloat(cols[9]) || 0, photo: cols[10]?.trim() || "",
+                    lat: parseFloat(cols[11]) || null, lng: parseFloat(cols[12]) || null, status: cols[13]?.trim() || 'Available',
+                    distance: null
+                };
+            }).sort((a,b) => b.rating - a.rating);
+
+            document.getElementById('status-msg').style.display = "none";
+            renderCards(allMechanics);
+        } catch (e) { document.getElementById('status-msg').innerText = "System Error: Could not connect to database."; }
+
+        // Trigger payment if invoice link was clicked
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('pay')) {
+            document.getElementById('display-amt').innerText = "₦" + parseInt(urlParams.get('pay')).toLocaleString();
+            document.getElementById('payment-overlay').style.display = 'flex';
+        }
+    }
+
+    // Haversine Distance Calculator
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c; 
+    }
+
+    function findNearestMechanic() {
+        const btn = document.getElementById('autoMatchBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SCANNING SATELLITES...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                allMechanics.forEach(m => {
+                    if (m.lat && m.lng) m.distance = calculateDistance(userLat, userLng, m.lat, m.lng);
+                });
+
+                let sortedMechanics = [...allMechanics].sort((a, b) => {
+                    if (a.status.toLowerCase() === 'busy') return 1;
+                    if (b.status.toLowerCase() === 'busy') return -1;
+                    if (a.distance === null) return 1;
+                    if (b.distance === null) return -1;
+                    return a.distance - b.distance;
+                });
+
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> NEAREST TECHNICIAN FOUND';
+                btn.style.background = "var(--neon)";
+                btn.style.color = "var(--obsidian)";
+                renderCards(sortedMechanics);
+            }, () => {
+                alert("Please allow GPS permissions to auto-match.");
+                btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Auto-Match Nearest Mechanic';
+            });
+        }
+    }
+
+    function renderCards(data) {
+        const list = document.getElementById('mechanic-list');
+        list.innerHTML = "";
+        
+        data.forEach(m => {
+            let stars = "";
+            for(let i=0; i<5; i++) stars += `<i class="fas fa-star" style="color: ${i < Math.floor(m.rating) ? 'var(--gold)' : '#334155'}"></i>`;
+            
+            let waPhone = m.phone.replace(/[^0-9]/g, '');
+            if(waPhone.startsWith('0')) waPhone = '234' + waPhone.substring(1);
+            else if(!waPhone.startsWith('234')) waPhone = '234' + waPhone;
+
+            let distanceHtml = m.distance ? `<div class="distance-badge"><i class="fas fa-route"></i> ${m.distance.toFixed(1)} km away</div>` : '';
+            let busyClass = m.status.toLowerCase() === 'busy' ? 'opacity:0.5; pointer-events:none;' : '';
+            let statusText = m.status.toLowerCase() === 'busy' ? '<span style="color:var(--danger); font-weight:800; font-size:0.7rem;">CURRENTLY DEPLOYED</span>' : '';
+
+            list.innerHTML += `
+                <div class="card" style="${busyClass}">
+                    ${distanceHtml}
+                    <span class="tier-badge ${m.rating >= 4.8 ? '' : 'style="background:var(--slate); color:white; border:1px solid #94A3B8;"'}">${m.rating >= 4.8 ? 'ELITE MASTER' : 'VERIFIED PRO'}</span>
+                    
+                    <div class="profile-area">
+                        <img src="${m.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
+                        <div class="tech-info">
+                            <h3>${m.name}</h3>
+                            <div class="rating-stars">${stars} ${m.rating.toFixed(1)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-meta">
+                        <i class="fas fa-wrench" style="color:var(--cyan)"></i> ${m.service} Specialist<br>
+                        <i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-top:5px;"></i> ${m.area} | ${m.address}<br>
+                        ${statusText}
+                    </div>
+
+                    <div class="scam-shield">
+                        <i class="fas fa-shield-virus" style="font-size:1.2rem;"></i>
+                        <p>SECURITY PROTOCOL: Pay securely via the digital invoice link sent by the mechanic. Cash payments VOID your warranty.</p>
+                    </div>
+
+                    <a href="tel:${m.phone}" class="btn-action btn-call" onclick="logAction('${m.name}', 'Direct Call')"><i class="fas fa-phone-alt"></i> Initialize Call</a>
+                    <button class="btn-action btn-gps" id="gps-btn-${m.name.replace(/\s+/g, '')}" onclick="sendGPSLocation('${waPhone}', '${m.name}')"><i class="fas fa-map-pin"></i> Send Live GPS Location</button>
+                </div>
+            `;
+        });
+    }
+
+    function sendGPSLocation(mechanicPhone, mechanicName) {
+        const btnId = 'gps-btn-' + mechanicName.replace(/\s+/g, '');
+        const btn = document.getElementById(btnId);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const link = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    const msg = encodeURIComponent(`Hello ${mechanicName}, I need your service urgently. My exact live location is here: ${link}`);
+                    logAction(mechanicName, 'GPS Location Dispatched');
+                    btn.innerHTML = originalText;
+                    window.open(`https://wa.me/${mechanicPhone}?text=${msg}`, '_blank');
+                },
+                function(error) {
+                    alert("Location access denied. Opening normal chat.");
+                    btn.innerHTML = originalText;
+                    window.open(`https://wa.me/${mechanicPhone}?text=I_need_your_service_my_location_is:`, '_blank');
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+    }
+
+    function logAction(name, type) {
+        window.open(`https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent('🚨 '+type+': Client connecting with '+name)}`);
+    }
+
+    function sendInvoice() {
+        const phone = document.getElementById('client-phone').value;
+        const amt = document.getElementById('final-amt').value;
+        if(!phone || !amt) return alert("Please enter Client Phone and Amount.");
+
+        const link = `${window.location.href.split('?')[0]}?pay=${amt}`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent('QuickFix Secure Invoice: Click here to pay and activate your 7-Day Warranty: ' + link)}`);
+        
+        setTimeout(() => {
+            window.open(`https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent('💰 INVOICE SENT: ₦' + amt + ' sent to ' + phone)}`, '_blank');
+        }, 1500);
+    }
+
+    function processFinalPayment() {
+        const amt = new URLSearchParams(window.location.search).get('pay');
+        
+        // CEO MATH: 15% Commission grossed up to cover Paystack fees
+        const targetCommission = Math.round(amt * 0.15);
+        let grossAmount = (targetCommission < 2500) ? Math.ceil(targetCommission / 0.983875) : Math.ceil((targetCommission + 107.5) / 0.983875);
+        
+        let paymentConfig = {
+            key: paystackPublicKey,
+            email: "payments@quickfix.ng",
+            amount: amt * 100, // Charge total to client
+            currency: "NGN",
+            callback: function() {
+                const ownerMsg = encodeURIComponent(`✅ PAYMENT SECURED: ₦${amt} Paid. Your commission is safe.`);
+                window.open(`https://wa.me/${ownerWhatsApp}?text=${ownerMsg}`, '_blank');
+                alert("PAYMENT SUCCESSFUL! Warranty Active.");
+                window.location.href = window.location.href.split('?')[0];
+            }
+        };
+
+        // Note: For automatic splitting, you would pass `subaccount: 'ACCT_xyz'` here 
+        // if your script passed that variable into this function from the URL.
+        
+        let handler = PaystackPop.setup(paymentConfig);
+        handler.openIframe();
+    }
+
+    function runSearch() {
+        const brand = document.getElementById('brandSelect').value.toLowerCase();
+        const area = document.getElementById('areaSelect').value.toLowerCase();
+        const street = document.getElementById('streetInput').value.toLowerCase();
+
+        const filtered = allMechanics.filter(m => {
+            const matchBrand = (brand === 'all' || m.service.toLowerCase().includes(brand));
+            const matchArea = (area === 'all' || m.area.toLowerCase() === area);
+            const matchStreet = (m.address.toLowerCase().includes(street) || m.name.toLowerCase().includes(street));
+            return matchBrand && matchArea && matchStreet;
+        });
+        renderCards(filtered);
+    }
+
+    loadData();
+</script>
+</body>
+</html>
